@@ -1,0 +1,47 @@
+#include "imports/stdlib.fc";
+
+int equal_slices(slice a, slice b) asm "SDEQ";
+
+
+(slice) getWallet() inline {
+    var cs = get_data().begin_parse();
+    return cs~load_msg_addr();
+}
+
+(slice) parse_sender_address(cell in_msg_full) inline {
+    var ds = in_msg_full.begin_parse();
+    var flags = ds~load_uint(4);
+    return ds~load_msg_addr();
+}
+
+() recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) {
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    if (op == 1) {
+        ;; здесь будем отправлять токены кошельку получателю и кошельку в памяти
+        var wallet = getWallet();
+        var sender = parse_sender_address(in_msg_full);
+        throw_if(1001, equal_slices(wallet, sender));
+        slice destination = in_msg_body~load_msg_addr();
+        var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(destination)
+            .store_coins(0)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_uint(3, 32)
+            .store_uint(query_id, 64)
+            .end_cell();
+        send_raw_message(msg, 64);
+        var msg2 = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(wallet)
+            .store_coins(1)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_uint(3, 32)
+            .store_uint(query_id, 64)
+            .end_cell();
+        send_raw_message(msg2, 128);
+    } 
+}
+
+
