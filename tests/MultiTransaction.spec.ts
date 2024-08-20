@@ -34,21 +34,30 @@ describe('MultiTransaction', () => {
         let user2 = await blockchain.treasury('user2');
         let user3 = await blockchain.treasury('user3');
         const address = user2.address;
+        console.log(sc.address)
         const result = await sc.sendWithAddress(
             user2.getSender(),
             toNano('1'),
             12345n,
             user3.address
         );
+        let owner =await sc.getOwner();
+        console.log(owner);
         expect(result.transactions).toHaveTransaction({
             from: sc.address,
             to: user3.address,
             success: true,
+            value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false)
         })
-        // expect(result.transactions).toHaveTransaction({
-        //     from: sc.address,
-        //     to: deployer.address,
-        //     success: true,
-        // })
+        const result2 = await sc.sendGetTon(
+            user2.getSender(),
+            toNano('1'),
+            12346n
+        );
+        expect(result2.transactions).toHaveTransaction({
+            from: sc.address,
+            to: deployer.address,
+            success: true,
+        })
     });
 });
