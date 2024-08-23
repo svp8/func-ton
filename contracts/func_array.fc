@@ -1,0 +1,49 @@
+#include "imports/stdlib.fc";
+
+(cell) load_data() impure inline {
+    var cs = get_data().begin_parse();
+    cell arr = new_dict();
+    if (~ slice_empty?(cs)) {
+        arr = cs~load_dict();
+    }
+    return arr;
+}
+
+() add_element(cell t, int key, int el) impure {
+    t~udict_add?(32, key, begin_cell().store_uint(32,el).end_cell().begin_parse());
+}
+
+() recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) {
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    if( op == 1 ){
+        int el = in_msg_body~load_uint(32);
+        cell arr = load_data();
+        (int k, slice x,int flag) = arr.udict_get_max?(32);
+        if (~ flag) {
+            k = 0;
+        }
+        k = k + 1;
+        ~dump(el);
+        ;; add_element(arr, k, el);
+        slice va = begin_cell().store_uint(el,32).end_cell().begin_parse();
+        ~dump(k);
+         arr~udict_add?(32, k, va);
+        (slice r,int j) = arr.idict_get?(32,1);
+        if (arr.dict_empty?()) {
+                throw(12);
+        }
+        ~dump(j);
+        set_data(begin_cell().store_dict(arr).end_cell());
+    }
+}
+
+
+(cell) get_array() method_id {
+    cell arr = load_data();
+     if (arr.dict_empty?()) {
+        throw(12);
+     }
+    ;; (slice k, int h) = arr.idict_get?(32,1);
+    return arr;
+}

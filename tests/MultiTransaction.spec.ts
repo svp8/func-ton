@@ -1,4 +1,4 @@
-import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
+import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees,prettyLogTransactions } from '@ton/sandbox';
 import { Cell, toNano } from '@ton/core';
 import { MultiTransaction } from '../wrappers/MultiTransaction';
 import '@ton/test-utils';
