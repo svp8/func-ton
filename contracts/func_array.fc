@@ -1,3 +1,5 @@
+;; Smart contract for writing data into array (only integers)
+;; 
 #include "imports/stdlib.fc";
 
 (cell) load_data() impure inline {
@@ -27,11 +29,10 @@
         ~dump(el);
         ;; add_element(arr, k, el);
         slice va = begin_cell().store_uint(el,32).end_cell().begin_parse();
-        ~dump(k);
-         arr~udict_add?(32, k, va);
+        arr~udict_add?(32, k, va);
         (slice r,int j) = arr.idict_get?(32,1);
         if (arr.dict_empty?()) {
-                throw(12);
+            throw(12);
         }
         ~dump(j);
         set_data(begin_cell().store_dict(arr).end_cell());
@@ -41,9 +42,9 @@
 
 (cell) get_array() method_id {
     cell arr = load_data();
-     if (arr.dict_empty?()) {
+    if (arr.dict_empty?()) {
         throw(12);
-     }
+    }
     ;; (slice k, int h) = arr.idict_get?(32,1);
-    return arr;
+    return  begin_cell().store_dict(arr).end_cell();
 }

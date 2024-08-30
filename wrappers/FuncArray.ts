@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, Dictionary, DictionaryValue } from '@ton/core';
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode, Dictionary, DictionaryValue,Builder,Slice } from '@ton/core';
 
 export type FuncArrayConfig = {
 };
@@ -10,7 +10,16 @@ export function funcArrayConfigToCell(config: FuncArrayConfig): Cell {
 export const Opcodes = {
     increase: 0x7e8764ef,
 };
-
+export const dicValue: DictionaryValue<number> = {
+    serialize: function (src: number, builder: Builder) {
+       console.log("Not implemented");
+    },
+    parse: function (src: Slice): number {
+        console.log(123)
+       let num= src.loadUint(32);
+        return num;
+    },
+}
 export class FuncArray implements Contract {
     constructor(readonly address: Address, readonly init?: {}) { }
 
@@ -52,11 +61,15 @@ export class FuncArray implements Contract {
         });
     }
 
-    async getArray(provider: ContractProvider) {
+    async getArray(provider: ContractProvider): Promise<number[]> {
         const result = await provider.get('get_array', []);
-        console.log(result.stack.readCell());
-       let map= Dictionary.load(Dictionary.Keys.Uint(32), Dictionary.Values.Buffer(32),result.stack.readCell().beginParse());
-        return map;
+        // const result2 = await provider.get('get_number', []);
+        // let n=result2.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(32),dicValue);
+        // console.log(n);
+        // // console.log(result.stack.readCell());
+       let map= result.stack.readCell().beginParse().loadDict(Dictionary.Keys.Uint(32),dicValue);
+       let arr=map.values();
+        return arr;
     }
 
 

@@ -53,6 +53,7 @@ describe('FuncArray', () => {
             success: true,
         });
         let arr = await funcArray.getArray();
-        console.log(arr)
+        expect(arr).toHaveLength(1);
+        expect(arr[0]).toEqual(1);
     });
 });
